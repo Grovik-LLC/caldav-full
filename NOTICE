@@ -1,0 +1,39 @@
+CalDAV Full
+Publisher: Grovik LLC
+Copyright 2026 Grovik LLC
+
+This project is licensed under the Apache License, Version 2.0.
+See the LICENSE file.
+
+Grovik LLC holds the copyright in its own contributions. That copyright does
+not cover Home Assistant Core or other upstream work.
+
+Portions of this integration are adapted from the native CalDAV integration
+in Home Assistant Core. That upstream work remains:
+
+  Project: Home Assistant Core
+  Tag: 2026.10.0
+  Copyright: The Home Assistant Authors
+  License: Apache License, Version 2.0
+  Integration path: homeassistant/components/caldav
+  Source: https://github.com/home-assistant/core/tree/2026.10.0/homeassistant/components/caldav
+
+Home Assistant calendar platform constants that this project must stay
+compatible with live at homeassistant/components/calendar in the same tag.
+
+When upstream source is copied into this repository, keep the upstream
+copyright and license notices in those files. Do not remove or rewrite
+them. Record the adapted files in docs/CALDAV_FULL_00_PROJECT_INDEX.md.
+
+Phase 1 adapts the config-entry calendar path from tag 2026.10.0 into:
+
+  custom_components/caldav_full/__init__.py
+  custom_components/caldav_full/api.py
+  custom_components/caldav_full/calendar.py
+  custom_components/caldav_full/config_flow.py
+  custom_components/caldav_full/const.py
+  custom_components/caldav_full/coordinator.py
+
+Those modules carry attribution docstrings. The native to-do platform,
+YAML setup, and custom search calendars were not copied. Update and
+delete were not copied from Home Assistant Core.

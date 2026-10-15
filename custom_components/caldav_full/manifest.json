@@ -1,0 +1,14 @@
+{
+  "domain": "caldav_full",
+  "name": "CalDAV Full",
+  "codeowners": ["@dflyman60"],
+  "config_flow": true,
+  "documentation": "https://www.grovik.co/caldav-full",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/Grovik-LLC/caldav-full/issues",
+  "loggers": ["caldav", "vobject"],
+  "quality_scale": "custom",
+  "requirements": ["caldav==3.3.0a1", "icalendar==6.3.1", "vobject==0.9.9"],
+  "version": "0.1.0"
+}

@@ -1,0 +1,103 @@
+{
+  "config": {
+    "abort": {
+      "already_configured": "Account is already configured"
+    },
+    "create_entry": {
+      "default": "CalDAV Full has been configured."
+    },
+    "error": {
+      "cannot_connect": "Failed to connect",
+      "invalid_auth": "Invalid authentication",
+      "unknown": "Unexpected error"
+    },
+    "step": {
+      "calendars": {
+        "data": {
+          "calendars": "Calendars"
+        },
+        "data_description": {
+          "calendars": "Leave this empty for the safest setup. A checked calendar is not activated until the next confirmation. Activating a calendar exposes it in Home Assistant, including creating, updating, and deleting events."
+        },
+        "description": "None of the discovered calendars are selected. Continue with no calendars, or choose calendars to consider. Nothing is activated until you confirm the next step.",
+        "title": "Calendars"
+      },
+      "confirm_activate": {
+        "description": "These calendars will be exposed: {calendars}. Activating them enables creating, updating, and deleting events through Home Assistant.",
+        "menu_options": {
+          "calendars": "Back to calendar list",
+          "init": "Back to calendar list",
+          "save_selected": "Activate selected calendars"
+        },
+        "title": "Confirm calendar activation"
+      },
+      "confirm_none": {
+        "description": "No calendars will be exposed, and CalDAV Full will not create a calendar entity. This is the safest initial configuration. The integration can still sign in and list calendar names.",
+        "menu_options": {
+          "calendars": "Back to calendar list",
+          "init": "Back to calendar list",
+          "save_none": "Continue with no calendars"
+        },
+        "title": "No calendars activated"
+      },
+      "init": {
+        "data": {
+          "calendars": "Calendars"
+        },
+        "data_description": {
+          "calendars": "Clear every calendar to expose nothing. A checked calendar is not saved until the next confirmation. Activating a calendar exposes it in Home Assistant, including creating, updating, and deleting events."
+        },
+        "description": "Choose the calendars to expose. Newly discovered calendars stay unselected. Nothing changes until you confirm the next step.",
+        "title": "Calendars"
+      },
+      "reauth_confirm": {
+        "data": {
+          "password": "Password"
+        },
+        "description": "The password for {username} is invalid.",
+        "title": "Reauthenticate"
+      },
+      "user": {
+        "data": {
+          "password": "Password",
+          "url": "URL",
+          "username": "Username",
+          "verify_ssl": "Verify SSL certificate"
+        },
+        "description": "Enter the CalDAV server credentials for this experimental integration.",
+        "title": "CalDAV Full"
+      }
+    }
+  },
+  "options": {
+    "step": {
+      "confirm_activate": {
+        "description": "These calendars will be exposed: {calendars}. Activating them enables creating, updating, and deleting events through Home Assistant.",
+        "menu_options": {
+          "init": "Back to calendar list",
+          "save_selected": "Activate selected calendars"
+        },
+        "title": "Confirm calendar activation"
+      },
+      "confirm_none": {
+        "description": "No calendars will be exposed, and CalDAV Full will not create a calendar entity. This is the safest initial configuration. The integration can still sign in and list calendar names.",
+        "menu_options": {
+          "init": "Back to calendar list",
+          "save_none": "Continue with no calendars"
+        },
+        "title": "No calendars activated"
+      },
+      "init": {
+        "data": {
+          "calendars": "Calendars"
+        },
+        "data_description": {
+          "calendars": "Clear every calendar to expose nothing. A checked calendar is not saved until the next confirmation. Activating a calendar exposes it in Home Assistant, including creating, updating, and deleting events."
+        },
+        "description": "Choose the calendars to expose. Newly discovered calendars stay unselected. Nothing changes until you confirm the next step.",
+        "title": "Calendars"
+      }
+    }
+  },
+  "title": "CalDAV Full"
+}
