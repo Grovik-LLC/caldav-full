@@ -23,7 +23,9 @@ Do not install it on an older Home Assistant Core release. Those library pins ma
 
 ## Installation
 
-HACS default-store installation is not available. Custom-repository installation requires a GitHub release. That installation path has not been verified.
+The published release is v0.1.0 at https://github.com/Grovik-LLC/caldav-full. HACS custom-repository installation of that release passed. CalDAV Full v0.1.1 is a maintenance update that improves Apple iCloud setup guidance and documentation. It does not change calendar event behavior.
+
+HACS default-store installation is not available.
 
 ### HACS custom repository
 
@@ -34,6 +36,8 @@ HACS default-store installation is not available. Custom-repository installation
 5. Go to Settings, Devices & services, Add integration, and choose CalDAV Full.
 6. Enter the CalDAV account, then select the calendars and activate them.
 
+The icon is included for Home Assistant and appears there. HACS can still show a placeholder. Home Assistant's brand service returns that placeholder for a custom integration that is not in the older brand catalog, and HACS uses that response. No extra metadata in this repository changes it.
+
 ### Manual copy
 
 1. Copy `custom_components/caldav_full` into the Home Assistant `config/custom_components` directory.
@@ -43,6 +47,8 @@ HACS default-store installation is not available. Custom-repository installation
 ## Configuration
 
 The setup form asks for the CalDAV URL, username, password, and whether to verify the SSL certificate.
+
+For Apple iCloud, enter an app-specific password, not the Apple Account password. The account needs two-factor authentication. Sign in at https://account.apple.com, open Sign-In and Security, then App-Specific Passwords, and generate a password. Apple's steps are at https://support.apple.com/en-us/102654. Other CalDAV servers use their own password.
 
 After sign-in, CalDAV Full lists calendar names. A new setup starts with nothing selected. Newly discovered calendars stay unselected. Nothing is saved until the confirmation step.
 
@@ -81,9 +87,11 @@ Also not supported:
 
 ## iCloud
 
-Apple CalDAV interoperability is verified for the operations covered by the accepted test record: calendar discovery, event reads, creating a series, conditional create/update/delete of a non-recurring event, and editing or excluding one occurrence of a supported series.
+The production acceptance of installed v0.1.0 covers Apple authentication, creating, updating, and deleting events, and bidirectional synchronization. Recurring-event behavior on that production install has not been accepted.
 
-These limits remain part of that record:
+Earlier isolated tests covered calendar discovery, event reads, creating a series, and editing or excluding one occurrence. Those results are separate from the production acceptance.
+
+These limits remain:
 
 - A recurring occurrence that crosses the spring-forward clock change has not been live-validated.
 - Live evidence confirms time-zone data is present. It does not prove every individual time-zone line is preserved byte for byte.

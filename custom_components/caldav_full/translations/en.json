@@ -64,7 +64,10 @@
           "username": "Username",
           "verify_ssl": "Verify SSL certificate"
         },
-        "description": "Enter the CalDAV server credentials for this experimental integration.",
+        "data_description": {
+          "password": "For Apple iCloud, turn on two-factor authentication, sign in at https://account.apple.com, open Sign-In and Security, then App-Specific Passwords, and generate a password. Official steps are at https://support.apple.com/en-us/102654."
+        },
+        "description": "Enter the CalDAV server URL, username, and password. An Apple iCloud account needs an app-specific password in this field, not the Apple Account password. Other CalDAV servers use their own password.",
         "title": "CalDAV Full"
       }
     }
