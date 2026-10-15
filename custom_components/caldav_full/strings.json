@@ -19,7 +19,7 @@
         "data_description": {
           "calendars": "Leave this empty for the safest setup. A checked calendar is not activated until the next confirmation. Activating a calendar exposes it in Home Assistant, including creating, updating, and deleting events."
         },
-        "description": "None of the discovered calendars are selected. Continue with no calendars, or choose calendars to consider. Nothing is activated until you confirm the next step.",
+        "description": "None of the discovered calendars are selected. Continue with no calendars, or choose calendars to consider. Nothing is activated until you confirm the next step. CalDAV Full entity ids end in _full. The same name from Home Assistant's built-in CalDAV integration is a different entity.",
         "title": "Calendars"
       },
       "confirm_activate": {
@@ -47,7 +47,7 @@
         "data_description": {
           "calendars": "Clear every calendar to expose nothing. A checked calendar is not saved until the next confirmation. Activating a calendar exposes it in Home Assistant, including creating, updating, and deleting events."
         },
-        "description": "Choose the calendars to expose. Newly discovered calendars stay unselected. Nothing changes until you confirm the next step.",
+        "description": "Choose the calendars to expose. Newly discovered calendars stay unselected. Nothing changes until you confirm the next step. CalDAV Full entity ids end in _full. The same name from Home Assistant's built-in CalDAV integration is a different entity.",
         "title": "Calendars"
       },
       "reauth_confirm": {
@@ -97,7 +97,7 @@
         "data_description": {
           "calendars": "Clear every calendar to expose nothing. A checked calendar is not saved until the next confirmation. Activating a calendar exposes it in Home Assistant, including creating, updating, and deleting events."
         },
-        "description": "Choose the calendars to expose. Newly discovered calendars stay unselected. Nothing changes until you confirm the next step.",
+        "description": "Choose the calendars to expose. Newly discovered calendars stay unselected. Nothing changes until you confirm the next step. CalDAV Full entity ids end in _full. The same name from Home Assistant's built-in CalDAV integration is a different entity.",
         "title": "Calendars"
       }
     }

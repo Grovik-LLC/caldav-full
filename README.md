@@ -23,7 +23,7 @@ Do not install it on an older Home Assistant Core release. Those library pins ma
 
 ## Installation
 
-CalDAV Full v0.1.2 is the version in this source tree. It is a maintenance correction for multi-calendar activation. Saving a changed calendar selection reloads the integration so each selected calendar is exposed. Install it through the HACS custom repository at https://github.com/Grovik-LLC/caldav-full.
+CalDAV Full v0.1.3 is the version in this source tree. It adds guidance for duplicate calendar names when another CalDAV integration is also configured. Saving a changed calendar selection reloads the integration so each selected calendar is exposed. Install it through the HACS custom repository at <https://github.com/Grovik-LLC/caldav-full>.
 
 HACS default-store installation is not available.
 
@@ -97,6 +97,16 @@ These limits remain:
 - Live evidence confirms time-zone data is present. It does not prove every individual time-zone line is preserved byte for byte.
 - Lookup of an Apple event can use the observed `{uid}.ics` resource name. That naming is not a guarantee for every CalDAV server.
 - Home Assistant still advertises create, update, and delete for the whole entity. A whole-series change is rejected when it is requested.
+
+## Duplicate calendar names
+
+Home Assistant's built-in CalDAV integration and CalDAV Full are separate integrations. If both are configured for the same account, each calendar can appear twice.
+
+A CalDAV Full entity id ends in `_full`. The built-in CalDAV integration does not use that suffix. On the entities page, the Integration column reads CalDAV Full or CalDAV.
+
+Before removing the built-in integration, search dashboards, automations, and scripts for its entity ids. Update those references to the CalDAV Full entity, or remove them, and then delete the old integration.
+
+Removing that Home Assistant integration does not delete calendars or events on the CalDAV server.
 
 ## Support
 
