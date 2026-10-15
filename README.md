@@ -23,7 +23,7 @@ Do not install it on an older Home Assistant Core release. Those library pins ma
 
 ## Installation
 
-The published release is v0.1.0 at https://github.com/Grovik-LLC/caldav-full. HACS custom-repository installation of that release passed. CalDAV Full v0.1.1 is a maintenance update that improves Apple iCloud setup guidance and documentation. It does not change calendar event behavior.
+CalDAV Full v0.1.2 is the version in this source tree. It is a maintenance correction for multi-calendar activation. Saving a changed calendar selection reloads the integration so each selected calendar is exposed. Install it through the HACS custom repository at https://github.com/Grovik-LLC/caldav-full.
 
 HACS default-store installation is not available.
 

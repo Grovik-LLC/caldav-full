@@ -20,7 +20,7 @@ from homeassistant.config_entries import (
     ConfigEntry,
     ConfigFlow,
     ConfigFlowResult,
-    OptionsFlow,
+    OptionsFlowWithReload,
 )
 from homeassistant.const import CONF_PASSWORD, CONF_URL, CONF_USERNAME, CONF_VERIFY_SSL
 from homeassistant.core import HomeAssistant, callback
@@ -252,8 +252,8 @@ class CalDavConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
 
-class CalDavOptionsFlow(OptionsFlow):
-    """Change the selected calendar collections."""
+class CalDavOptionsFlow(OptionsFlowWithReload):
+    """Change the selected calendar collections and reload after a saved change."""
 
     def __init__(self) -> None:
         """Initialize pending confirmation state."""
