@@ -12,17 +12,56 @@ import recurring_ical_events
 from homeassistant.exceptions import HomeAssistantError
 from icalendar.prop import vDDDTypes
 
-from .mutations import _replace_time, apply_component_changes
-from .recurrence import format_recurrence_id, is_supported_series
+from .mutations import (
+    _RECURRENCE_PROPERTIES,
+    _replace_text,
+    _replace_time,
+    apply_component_changes,
+)
+from .recurrence import _end, format_recurrence_id, is_supported_series
 
 _NOT_SUPPORTED = "Recurring event changes are not supported for this calendar"
+_TIME_CHANGE = "Changing the time of a whole series is not supported yet"
 _DROPPED_FROM_OVERRIDE = ("rrule", "exdate", "exrule", "rdate")
+_LOOKUP_MARGIN = timedelta(days=1)
+_ALLOWED_COMPONENTS = {"VEVENT", "VTIMEZONE"}
 
 
 def reject_recurrence_range(recurrence_range: str | None) -> None:
     """Refuse every recurrence range, including THISANDFUTURE."""
     if recurrence_range:
         raise HomeAssistantError(_NOT_SUPPORTED)
+
+
+def stored_event_kind(event: Any, uid: str) -> str:
+    """Return ``plain`` or ``series`` after rejecting an unsafe body."""
+    calendar = _parsed_calendar(event, uid)
+    vevents = list(calendar.walk("VEVENT"))
+    if len(vevents) == 1 and not any(
+        name in vevents[0] for name in _RECURRENCE_PROPERTIES
+    ):
+        return "plain"
+    _require_supported_series(calendar, uid, vevents)
+    return "series"
+
+
+def update_series_metadata(event: Any, uid: str, changes: dict[str, Any]) -> None:
+    """Change master text when the payload names one displayed occurrence.
+
+    The lookup window runs from one day before the submitted start to one
+    day after the submitted end. An unbounded rule is expanded only inside
+    that window. A time change that lands on another occurrence's exact
+    displayed interval cannot be distinguished from a metadata edit of that
+    occurrence, because the request does not carry a recurrence id. That
+    request updates text and does not move the series.
+    """
+    calendar = _parsed_calendar(event, uid)
+    vevents = list(calendar.walk("VEVENT"))
+    _require_supported_series(calendar, uid, vevents)
+    master = _master(calendar)
+    _require_one_displayed_interval(calendar, uid, changes["dtstart"], changes["dtend"])
+    _apply_master_metadata(master, changes)
+    event.icalendar_instance = calendar
 
 
 def update_occurrence(
@@ -271,9 +310,7 @@ def _add_exdate(master: Any, original: date | datetime) -> None:
 def _exdate_parameters(master: Any, original: date | datetime) -> dict[str, Any]:
     """Keep TZID, and mark an all-day exclusion as DATE."""
     source = master["dtstart"].params
-    params = {
-        key: source[key] for key in source if str(key).upper() == "TZID"
-    }
+    params = {key: source[key] for key in source if str(key).upper() == "TZID"}
     if isinstance(original, datetime):
         return params
     value = next(
@@ -282,3 +319,145 @@ def _exdate_parameters(master: Any, original: date | datetime) -> dict[str, Any]
     )
     params["VALUE"] = value
     return params
+
+
+def _parsed_calendar(event: Any, uid: str) -> icalendar.Calendar:
+    """Return one parsed calendar, or reject a body that cannot be classified."""
+    try:
+        calendar = icalendar.Calendar.from_ical(event.data)
+    except ValueError as err:
+        raise HomeAssistantError(f"Calendar event {uid} is ambiguous") from err
+    components = list(calendar.subcomponents)
+    if not components or any(
+        component.name not in _ALLOWED_COMPONENTS for component in components
+    ):
+        raise HomeAssistantError(f"Calendar event {uid} is ambiguous")
+    vevents = [component for component in components if component.name == "VEVENT"]
+    if not vevents or any(
+        str(component.get("uid", "")) != uid for component in vevents
+    ):
+        raise HomeAssistantError(f"Calendar event {uid} is ambiguous")
+    return calendar
+
+
+def _require_supported_series(
+    calendar: icalendar.Calendar, uid: str, vevents: list[Any]
+) -> None:
+    """Require one supported series with distinct, unconflicted identities."""
+    if not is_supported_series(calendar):
+        raise HomeAssistantError(_NOT_SUPPORTED)
+    if _duplicate_recurrence_ids(vevents):
+        raise HomeAssistantError(f"Calendar event {uid} is ambiguous")
+    if _override_matches_exdate(calendar):
+        raise HomeAssistantError(f"Calendar event {uid} is ambiguous")
+    master = _master(calendar)
+    has_end = "dtend" in master
+    has_duration = "duration" in master
+    if has_end == has_duration:
+        raise HomeAssistantError(f"Calendar event {uid} is ambiguous")
+
+
+def _override_matches_exdate(calendar: icalendar.Calendar) -> bool:
+    """Return whether one override names an excluded original start."""
+    excluded = _exdate_values(_master(calendar))
+    for component in calendar.walk("VEVENT"):
+        if "RECURRENCE-ID" not in component:
+            continue
+        original = component["RECURRENCE-ID"].dt
+        if any(
+            _ids_equal(value, format_recurrence_id(original), original)
+            for value in excluded
+        ):
+            return True
+    return False
+
+
+def _require_one_displayed_interval(
+    calendar: icalendar.Calendar,
+    uid: str,
+    start: date | datetime,
+    end: date | datetime,
+) -> None:
+    """Accept one displayed occurrence and reject a changed time."""
+    if isinstance(start, datetime) != isinstance(end, datetime):
+        raise HomeAssistantError(_TIME_CHANGE)
+    if end <= start:
+        raise HomeAssistantError("Calendar event end must be after its start")
+    window_start, window_end = _lookup_window(start, end)
+    try:
+        occurrences = recurring_ical_events.of(calendar, components=["VEVENT"]).between(
+            window_start, window_end
+        )
+    except (ValueError, TypeError, AttributeError) as err:
+        raise HomeAssistantError("Recurrence identity could not be resolved") from err
+    matches = [
+        component
+        for component in occurrences
+        if not _cancelled(component) and _same_interval(component, start, end)
+    ]
+    if not matches:
+        raise HomeAssistantError(_TIME_CHANGE)
+    if len(matches) > 1:
+        raise HomeAssistantError(f"Calendar event {uid} is ambiguous")
+
+
+def _lookup_window(
+    start: date | datetime, end: date | datetime
+) -> tuple[datetime, datetime]:
+    """Return the bounded expansion window around one submitted interval."""
+    if isinstance(start, datetime) and isinstance(end, datetime):
+        return start - _LOOKUP_MARGIN, end + _LOOKUP_MARGIN
+    start_day = datetime.combine(start, time.min, tzinfo=UTC)
+    end_day = datetime.combine(end, time.min, tzinfo=UTC)
+    return start_day - _LOOKUP_MARGIN, end_day + _LOOKUP_MARGIN
+
+
+def _cancelled(component: Any) -> bool:
+    """Return whether expansion still surfaced a cancelled occurrence."""
+    return str(component.get("STATUS", "")).lower() == "cancelled"
+
+
+def _same_interval(
+    component: Any, start: date | datetime, end: date | datetime
+) -> bool:
+    """Return whether one displayed occurrence has this start and end."""
+    displayed_start = component["DTSTART"].dt
+    displayed_end = _end(component, displayed_start)
+    return _same_point(displayed_start, start) and _same_point(displayed_end, end)
+
+
+def _same_point(stored: date | datetime, submitted: date | datetime) -> bool:
+    """Compare instants for timed values and calendar dates for all-day values."""
+    if isinstance(stored, datetime) and isinstance(submitted, datetime):
+        if (stored.tzinfo is None) != (submitted.tzinfo is None):
+            return False
+        if stored.tzinfo is None:
+            return stored == submitted
+        return stored.astimezone(UTC) == submitted.astimezone(UTC)
+    if isinstance(stored, datetime) or isinstance(submitted, datetime):
+        return False
+    return stored == submitted
+
+
+def _apply_master_metadata(master: Any, changes: dict[str, Any]) -> None:
+    """Replace master text and leave the recurrence set untouched."""
+    if changes.get("rrule") and not _same_rrule(master, str(changes["rrule"])):
+        raise HomeAssistantError(_NOT_SUPPORTED)
+    _replace_text(master, "summary", changes["summary"])
+    if "description" in changes and changes["description"] is not None:
+        _replace_text(master, "description", changes["description"])
+    if "location" in changes and changes["location"] is not None:
+        _replace_text(master, "location", changes["location"])
+    if "sequence" in master:
+        sequence = int(master["sequence"])
+        master.pop("sequence")
+        master.add("sequence", sequence + 1)
+
+
+def _same_rrule(master: Any, text: str) -> bool:
+    """Return whether a payload rule is the stored rule."""
+    try:
+        incoming = icalendar.vRecur.from_ical(text)
+    except ValueError:
+        return False
+    return master["rrule"] == incoming

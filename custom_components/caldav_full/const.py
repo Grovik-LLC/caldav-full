@@ -15,8 +15,8 @@ SUPPORTED_COMPONENT: Final = "VEVENT"
 CONFIG_ENTRY_DEFAULT_DAYS: Final = 7
 ENTITY_ID_SUFFIX: Final = "_full"
 
-# Non-recurring and single-occurrence edits are implemented.
-# Series-wide edits and THISANDFUTURE are not.
+# Non-recurring edits, single-occurrence edits, and whole-series
+# metadata update and delete are implemented. Range edits are not.
 NONRECURRING_MUTATION_AUTHORIZED: Final = True
 OCCURRENCE_MUTATION_AUTHORIZED: Final = True
-RECURRING_MUTATION_AUTHORIZED: Final = False
+RECURRING_MUTATION_AUTHORIZED: Final = True

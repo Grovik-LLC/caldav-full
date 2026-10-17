@@ -7,7 +7,6 @@ Apache License, Version 2.0.
 This module sets up a calendar platform only. It does not set up to-do.
 """
 
-import logging
 from functools import partial
 
 from caldav.davclient import DAVClient
@@ -28,8 +27,6 @@ from .const import DOMAIN, TIMEOUT
 
 type CalDavConfigEntry = ConfigEntry[DAVClient]
 
-_LOGGER = logging.getLogger(__name__)
-
 PLATFORMS: list[Platform] = [Platform.CALENDAR]
 
 
@@ -48,12 +45,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: CalDavConfigEntry) -> bo
     try:
         await hass.async_add_executor_job(client.get_principal)
     except AuthorizationError as err:
-        if err.reason == "Unauthorized":
-            raise ConfigEntryAuthFailed("Credentials error from CalDAV server") from err
-        # AuthorizationError can be raised if the url is incorrect or
-        # on some other unexpected server response.
-        _LOGGER.warning("Unexpected CalDAV server response: %s", err)
-        return False
+        raise ConfigEntryAuthFailed("Credentials error from CalDAV server") from err
     except caldav_requests.exceptions.Timeout as err:
         raise ConfigEntryNotReady("Timeout connecting to CalDAV server") from err
     except caldav_requests.exceptions.ConnectionError as err:

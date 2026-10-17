@@ -201,9 +201,7 @@ class CalDavConfigFlow(ConfigFlow, domain=DOMAIN):
             discovered = await async_discovered_calendars(self.hass, client)
         except AuthorizationError as err:
             _LOGGER.warning("Authorization Error connecting to CalDAV server: %s", err)
-            if err.reason == "Unauthorized":
-                return "invalid_auth", []
-            return "cannot_connect", []
+            return "invalid_auth", []
         except caldav_requests.exceptions.Timeout as err:
             _LOGGER.warning("Timeout connecting to CalDAV server: %s", err)
             return "cannot_connect", []

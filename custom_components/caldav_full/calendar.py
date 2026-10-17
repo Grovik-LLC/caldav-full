@@ -6,7 +6,8 @@ Copyright The Home Assistant Authors. Licensed under the Apache License,
 Version 2.0.
 
 YAML setup, custom search calendars, and to-do are not implemented.
-Update and delete apply only to one non-recurring VEVENT.
+Update and delete cover one non-recurring event, one occurrence, or a
+supported whole-series metadata change or deletion.
 """
 
 import logging
@@ -48,7 +49,13 @@ from .mutations import (
     conditional_put,
     load_unique_event,
 )
-from .occurrence import delete_occurrence, reject_recurrence_range, update_occurrence
+from .occurrence import (
+    delete_occurrence,
+    reject_recurrence_range,
+    stored_event_kind,
+    update_occurrence,
+    update_series_metadata,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -214,7 +221,7 @@ class CalDavCalendarEntity(CoordinatorEntity[CalDavUpdateCoordinator], CalendarE
         recurrence_id: str | None = None,
         recurrence_range: str | None = None,
     ) -> None:
-        """Update one stored event, or one identified recurring occurrence."""
+        """Update one event, one occurrence, or the series master text."""
         reject_recurrence_range(recurrence_range)
         if recurrence_id:
             await self._async_mutate(
@@ -233,7 +240,7 @@ class CalDavCalendarEntity(CoordinatorEntity[CalDavUpdateCoordinator], CalendarE
         recurrence_id: str | None = None,
         recurrence_range: str | None = None,
     ) -> None:
-        """Delete one stored event, or exclude one identified occurrence."""
+        """Delete one event, exclude one occurrence, or delete one series."""
         reject_recurrence_range(recurrence_range)
         if recurrence_id:
             await self._async_mutate(
@@ -244,16 +251,20 @@ class CalDavCalendarEntity(CoordinatorEntity[CalDavUpdateCoordinator], CalendarE
         await self._async_mutate(partial(self._delete_stored_event, uid), "delete")
 
     def _update_stored_event(self, uid: str, event: dict[str, Any]) -> None:
-        """Load, edit, and conditionally save one stored event."""
+        """Load one resource and update either its event or its series text."""
         stored = load_unique_event(self.coordinator.calendar, uid)
-        assert_nonrecurring(stored, uid)
-        apply_changes(stored, event)
+        if stored_event_kind(stored, uid) == "series":
+            update_series_metadata(stored, uid, event)
+        else:
+            assert_nonrecurring(stored, uid)
+            apply_changes(stored, event)
         conditional_put(stored)
 
     def _delete_stored_event(self, uid: str) -> None:
-        """Load and conditionally delete one stored event."""
+        """Delete one plain event, or the one resource that holds a series."""
         stored = load_unique_event(self.coordinator.calendar, uid)
-        assert_nonrecurring(stored, uid)
+        if stored_event_kind(stored, uid) != "series":
+            assert_nonrecurring(stored, uid)
         conditional_delete(stored)
 
     def _update_occurrence(
