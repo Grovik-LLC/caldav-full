@@ -31,7 +31,7 @@ Support: contact@grovik.co
 | Delete a whole series | No | Yes |
 | Authentication failures classified during setup | Partial | Improved |
 
-Version 0.1.4 is the published release: https://github.com/Grovik-LLC/caldav-full/releases/tag/0.1.4
+Version 0.1.5 is the prepared release candidate. The latest published release remains 0.1.4 until 0.1.5 is tagged and published.
 
 ## Requirements
 
