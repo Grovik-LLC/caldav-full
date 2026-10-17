@@ -122,6 +122,10 @@ class CalDavConfigFlow(ConfigFlow, domain=DOMAIN):
         return self.async_show_form(
             step_id="user",
             data_schema=STEP_USER_DATA_SCHEMA,
+            description_placeholders={
+                "apple_account_url": "https://account.apple.com",
+                "apple_support_url": "https://support.apple.com/en-us/102654",
+            },
             errors=errors,
         )
 
