@@ -39,13 +39,13 @@ Version 0.1.4 is the published release: https://github.com/Grovik-LLC/caldav-ful
 - Python 3.14.2 or newer
 - Network access to the CalDAV server
 
-The integration installs these pinned libraries:
+The integration requires these minimum supported library versions:
 
-- `caldav==3.3.0a1`
-- `icalendar==6.3.1`
-- `vobject==0.9.9`
+- `caldav>=3.3.0a1`
+- `icalendar>=6.3.1`
+- `vobject>=0.9.9`
 
-Those pins match Home Assistant Core 2026.10.0. Do not install this release on an older Core.
+These minimum versions match the libraries shipped with Home Assistant Core 2026.10.0. Do not install this release on an older Core.
 
 ## Installation
 
